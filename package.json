@@ -1,0 +1,46 @@
+{
+  "name": "uzhavan-back_end",
+  "version": "1.0.0",
+  "description": "Production-ready MVP backend for Uzhavan.",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "ts-node server.ts",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "start": "node dist/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adithanbs/uzhavan-back_end.git"
+  },
+  "keywords": [
+    "uzhavan",
+    "backend",
+    "marketplace"
+  ],
+  "author": "",
+  "license": "ISC",
+  "engines": {
+    "node": ">=20"
+  },
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/adithanbs/uzhavan-back_end/issues"
+  },
+  "homepage": "https://github.com/adithanbs/uzhavan-back_end#readme",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "mongoose": "^9.4.1",
+    "morgan": "^1.10.1"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/morgan": "^1.9.10",
+    "@types/node": "^25.6.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.2"
+  }
+}
