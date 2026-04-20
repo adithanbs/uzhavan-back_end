@@ -1,9 +1,13 @@
 import mongoose from "mongoose";
-import { env } from "./env";
+import { env, isProduction } from "./env";
 
 export const connectDB = async () => {
   await mongoose.connect(env.MONGO_URI, {
-    serverSelectionTimeoutMS: 10000
+    autoIndex: !isProduction,
+    maxPoolSize: 10,
+    minPoolSize: 0,
+    serverSelectionTimeoutMS: 5000,
+    socketTimeoutMS: 45000
   });
 
   console.log("MongoDB connected");

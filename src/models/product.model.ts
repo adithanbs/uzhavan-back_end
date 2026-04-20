@@ -1,6 +1,14 @@
 import { HydratedDocument, InferSchemaType, Schema, model } from "mongoose";
 
 const phoneRegex = /^\+?[0-9\s-]{7,20}$/;
+const isHttpUrl = (value: string) => {
+  try {
+    const parsed = new URL(value);
+    return parsed.protocol === "http:" || parsed.protocol === "https:";
+  } catch {
+    return false;
+  }
+};
 
 const productSchema = new Schema(
   {
@@ -40,7 +48,17 @@ const productSchema = new Schema(
       match: [phoneRegex, "Phone must be a valid phone number"]
     },
     images: {
-      type: [String],
+      type: [
+        {
+          type: String,
+          trim: true,
+          maxlength: [2048, "Image URL must be 2048 characters or less"],
+          validate: {
+            validator: isHttpUrl,
+            message: "Image must be a valid http or https URL"
+          }
+        }
+      ],
       required: [true, "At least one product image is required"],
       validate: {
         validator: (images: string[]) => images.length >= 1 && images.length <= 8,
@@ -55,7 +73,8 @@ const productSchema = new Schema(
   },
   {
     timestamps: true,
-    versionKey: false
+    versionKey: false,
+    strict: "throw"
   }
 );
 

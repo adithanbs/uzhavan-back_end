@@ -27,8 +27,21 @@ const normalizeError = (error: unknown): AppError => {
     return new AppError("Invalid resource identifier", 400);
   }
 
+  if (error instanceof mongoose.Error.StrictModeError) {
+    return new AppError(error.message, 400);
+  }
+
   if (typeof error === "object" && error !== null && "code" in error && error.code === 11000) {
     return new AppError("Duplicate value already exists", 409);
+  }
+
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "status" in error &&
+    error.status === 400
+  ) {
+    return new AppError("Invalid request body", 400);
   }
 
   return new AppError("Internal server error", 500);
