@@ -46,11 +46,78 @@ http://localhost:5050
 ## Current API Routes
 
 - `GET /health` checks service health.
-- `GET /api/products` lists all products.
-- `POST /api/products` creates a product.
-- `GET /api/products/:id` fetches one product.
+- `GET /api/v1/products` lists all products.
+- `POST /api/v1/products` creates a product.
+- `GET /api/v1/products/:id` fetches one product.
 
-The legacy `/api/products` path still works for the current frontend while newer clients can use `/api/v1/products`.
+Legacy `/api/products` routes also work for older frontend code, but new code should use `/api/v1/products`.
+
+## Product Fields
+
+Required fields:
+
+- `name`: product name.
+- `category`: product type/category.
+- `location`: seller/product location.
+- `phone`: seller mobile number.
+- `images`: at least one product image URL.
+
+Optional fields:
+
+- `price`: product price.
+- `quantity`: available quantity.
+- `description`: product details.
+
+MongoDB creates the product id automatically as `_id`, so the frontend does not need to send `productId`.
+
+## Postman Examples
+
+Create product with required fields only:
+
+```http
+POST http://localhost:5050/api/v1/products
+```
+
+```json
+{
+  "name": "Tomato",
+  "category": "Vegetable",
+  "location": "Coimbatore",
+  "phone": "9876543210",
+  "images": [
+    "https://example.com/tomato.jpg"
+  ]
+}
+```
+
+Create product with optional fields:
+
+```json
+{
+  "name": "Tomato",
+  "category": "Vegetable",
+  "price": 40,
+  "quantity": "1 kg",
+  "location": "Coimbatore",
+  "phone": "9876543210",
+  "images": [
+    "https://example.com/tomato.jpg"
+  ],
+  "description": "Fresh tomato from farm"
+}
+```
+
+List all products:
+
+```http
+GET http://localhost:5050/api/v1/products
+```
+
+Get one product by id:
+
+```http
+GET http://localhost:5050/api/v1/products/<product_id>
+```
 
 ## Folder Structure
 
@@ -58,7 +125,7 @@ The legacy `/api/products` path still works for the current frontend while newer
 src/
   config/        Environment and database configuration
   controllers/   Request/response handling
-  middlewares/   Error handling, async handling, and validation
+  middlewares/   Error handling and async handling
   models/        Mongoose schemas and model types
   routers/       Express route definitions
   services/      Business logic and database access
@@ -72,7 +139,7 @@ src/
 2. Backend returns all products, newest first.
 3. User clicks add product in the frontend.
 4. Frontend sends product details to `POST /api/v1/products`.
-5. Backend validates and saves the product.
+5. Backend saves the product after Mongoose model validation.
 6. Frontend refreshes the dashboard list.
 7. User opens a product using `GET /api/v1/products/:id`.
 8. User contacts the seller directly through the product mobile number.

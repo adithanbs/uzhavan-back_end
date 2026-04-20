@@ -4,11 +4,10 @@ import {
   createProduct,
   getProduct
 } from "../controllers/product.controller";
-import { validateProduct } from "../middlewares/validate-product";
 
 const router = Router();
 
-router.route("/").get(getProducts).post(validateProduct(), createProduct);
+router.route("/").get(getProducts).post(createProduct);
 router.route("/:id").get(getProduct);
 
 export default router;

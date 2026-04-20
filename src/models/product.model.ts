@@ -19,12 +19,10 @@ const productSchema = new Schema(
     },
     price: {
       type: Number,
-      required: [true, "Price is required"],
       min: [0, "Price cannot be negative"]
     },
     quantity: {
       type: String,
-      required: [true, "Quantity is required"],
       trim: true,
       maxlength: [60, "Quantity must be 60 characters or less"]
     },
@@ -43,10 +41,10 @@ const productSchema = new Schema(
     },
     images: {
       type: [String],
-      default: [],
+      required: [true, "At least one product image is required"],
       validate: {
-        validator: (images: string[]) => images.length <= 8,
-        message: "Images cannot contain more than 8 items"
+        validator: (images: string[]) => images.length >= 1 && images.length <= 8,
+        message: "Images must contain between 1 and 8 items"
       }
     },
     description: {

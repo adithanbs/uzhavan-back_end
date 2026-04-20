@@ -1,10 +1,10 @@
 export interface ProductInput {
   name: string;
   category: string;
-  price: number;
-  quantity: string;
+  price?: number;
+  quantity?: string;
   location: string;
   phone: string;
-  images?: string[];
+  images: string[];
   description?: string;
 }
