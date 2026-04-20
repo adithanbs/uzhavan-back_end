@@ -1,8 +1,9 @@
 import mongoose from "mongoose";
 import ProductModel from "../models/product.model";
-import { env } from "../config/env";
 import { ProductInput } from "../types/product.types";
 import { AppError } from "../utils/http-error";
+import { PRODUCT_LIST_DEFAULT_LIMIT } from "../constants";
+
 
 export interface ProductListOptions {
   page?: number;
@@ -11,12 +12,6 @@ export interface ProductListOptions {
   category?: string;
   location?: string;
 }
-
-const ensureValidProductId = (id: string) => {
-  if (!mongoose.isValidObjectId(id)) {
-    throw new AppError("Invalid product id", 400);
-  }
-};
 
 const escapeRegex = (value: string) => {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -38,7 +33,7 @@ export const createProduct = async (data: ProductInput) => {
 
 export const getProducts = async (options: ProductListOptions = {}) => {
   const page = options.page ?? 1;
-  const limit = options.limit ?? env.PRODUCT_LIST_DEFAULT_LIMIT;
+  const limit = options.limit ?? PRODUCT_LIST_DEFAULT_LIMIT;
   const filter: Record<string, unknown> = {};
   const searchRegex = buildContainsRegex(options.search);
   const categoryRegex = buildContainsRegex(options.category);
@@ -68,14 +63,15 @@ export const getProducts = async (options: ProductListOptions = {}) => {
     .maxTimeMS(5000);
 };
 
+
+
 export const getProductById = async (id: string) => {
-  ensureValidProductId(id);
-
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    throw new AppError("Invalid product id", 400);
+  }
   const product = await ProductModel.findById(id).lean().maxTimeMS(5000);
-
   if (!product) {
     throw new AppError("Product not found", 404);
   }
-
   return product;
 };
