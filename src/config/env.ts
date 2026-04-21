@@ -1,114 +1,22 @@
-import dotenv from "dotenv";
-
-dotenv.config({ quiet: true });
-
-type NodeEnv = "development" | "production" | "test";
-
-const validNodeEnvs: NodeEnv[] = ["development", "production", "test"];
-
-const readRequiredEnv = (key: string): string => {
-  const value = process.env[key];
-
-  if (!value || value.trim().length === 0) {
-    throw new Error(`Missing required environment variable: ${key}`);
-  }
-
-  return value.trim();
+const parseCorsOrigin = (origin: string | undefined): string | string[] => {
+  if (!origin || origin === "*") return "*";
+  return origin.split(",").map((item) => item.trim()).filter(Boolean);
 };
 
-const readNodeEnv = (): NodeEnv => {
-  const nodeEnv = process.env.NODE_ENV ?? "development";
-
-  if (!validNodeEnvs.includes(nodeEnv as NodeEnv)) {
-    throw new Error(
-      `Invalid NODE_ENV "${nodeEnv}". Expected one of: ${validNodeEnvs.join(", ")}`
-    );
-  }
-
-  return nodeEnv as NodeEnv;
+const toNumber = (value: string | undefined, fallback: number): number => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
 };
-
-const readPort = (): number => {
-  const rawPort = process.env.PORT ?? "5000";
-  const port = Number(rawPort);
-
-  if (!Number.isInteger(port) || port <= 0 || port > 65535) {
-    throw new Error(`Invalid PORT "${rawPort}". PORT must be between 1 and 65535.`);
-  }
-
-  return port;
-};
-
-const readPositiveIntegerEnv = (key: string, defaultValue: number): number => {
-  const rawValue = process.env[key];
-
-  if (!rawValue || rawValue.trim().length === 0) {
-    return defaultValue;
-  }
-
-  const value = Number(rawValue);
-
-  if (!Number.isInteger(value) || value <= 0) {
-    throw new Error(`Invalid ${key} "${rawValue}". ${key} must be a positive integer.`);
-  }
-
-  return value;
-};
-
-const readBooleanEnv = (key: string, defaultValue: boolean): boolean => {
-  const rawValue = process.env[key];
-
-  if (!rawValue || rawValue.trim().length === 0) {
-    return defaultValue;
-  }
-
-  if (rawValue === "true") {
-    return true;
-  }
-
-  if (rawValue === "false") {
-    return false;
-  }
-
-  throw new Error(`Invalid ${key} "${rawValue}". ${key} must be true or false.`);
-};
-
-const readCorsOrigin = (nodeEnv: NodeEnv): string | string[] => {
-  const rawOrigin = process.env.CORS_ORIGIN;
-
-  if (!rawOrigin || rawOrigin.trim().length === 0) {
-    if (nodeEnv === "production") {
-      throw new Error("CORS_ORIGIN must be configured in production.");
-    }
-
-    return "*";
-  }
-
-  const origins = rawOrigin
-    .split(",")
-    .map((origin) => origin.trim())
-    .filter(Boolean);
-
-  if (nodeEnv === "production" && origins.includes("*")) {
-    throw new Error("CORS_ORIGIN cannot be '*' in production.");
-  }
-
-  return origins.length === 1 ? origins[0] : origins;
-};
-
-const nodeEnv = readNodeEnv();
 
 export const env = {
-  NODE_ENV: nodeEnv,
-  PORT: readPort(),
-  MONGO_URI: readRequiredEnv("MONGO_URI"),
-  CORS_ORIGIN: readCorsOrigin(nodeEnv),
+  NODE_ENV: process.env.NODE_ENV ?? "development",
+  PORT: toNumber(process.env.PORT, 5000),
+  MONGO_URI: process.env.MONGO_URI ?? "",
+  CORS_ORIGIN: parseCorsOrigin(process.env.CORS_ORIGIN),
+  TRUST_PROXY: process.env.TRUST_PROXY === "1" || process.env.TRUST_PROXY === "true",
   REQUEST_BODY_LIMIT: process.env.REQUEST_BODY_LIMIT ?? "1mb",
-  RATE_LIMIT_WINDOW_MS: readPositiveIntegerEnv("RATE_LIMIT_WINDOW_MS", 60000),
-  RATE_LIMIT_MAX: readPositiveIntegerEnv("RATE_LIMIT_MAX", nodeEnv === "production" ? 120 : 1000),
-  PRODUCT_LIST_DEFAULT_LIMIT: readPositiveIntegerEnv("PRODUCT_LIST_DEFAULT_LIMIT", 50),
-  PRODUCT_LIST_MAX_LIMIT: readPositiveIntegerEnv("PRODUCT_LIST_MAX_LIMIT", 100),
-  TRUST_PROXY: readBooleanEnv("TRUST_PROXY", nodeEnv === "production")
-} as const;
+  PRODUCT_LIST_DEFAULT_LIMIT: toNumber(process.env.PRODUCT_LIST_DEFAULT_LIMIT, 10),
+  PRODUCT_LIST_MAX_LIMIT: toNumber(process.env.PRODUCT_LIST_MAX_LIMIT, 50)
+};
 
 export const isProduction = env.NODE_ENV === "production";

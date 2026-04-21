@@ -1,19 +1,16 @@
 import mongoose from "mongoose";
-import { env, isProduction } from "./env";
+import { env } from "./env";
 
 export const connectDB = async () => {
-  await mongoose.connect(env.MONGO_URI, {
-    autoIndex: !isProduction,
-    maxPoolSize: 10,
-    minPoolSize: 0,
-    serverSelectionTimeoutMS: 5000,
-    socketTimeoutMS: 45000
-  });
-
-  console.log("MongoDB connected");
+  try {
+    await mongoose.connect(env.MONGO_URI);
+    console.log("MongoDB connected");
+  } catch (error) {
+    console.error("MongoDB connection failed:", error);
+    process.exit(1);
+  }
 };
 
 export const disconnectDB = async () => {
   await mongoose.disconnect();
-  console.log("MongoDB disconnected");
 };

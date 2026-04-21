@@ -1,14 +1,14 @@
+import { Server } from "http";
 import app from "./app";
 import { env } from "./src/config/env";
 import { connectDB, disconnectDB } from "./src/config/db";
-import { Server } from "http";
 
 let server: Server | undefined;
 
 const shutdown = (signal: string) => {
   console.log(`${signal} received. Shutting down gracefully.`);
 
-  const forceExit = setTimeout(() => {
+  const forceExit: NodeJS.Timeout = setTimeout(() => {
     console.error("Graceful shutdown timed out. Exiting.");
     process.exit(1);
   }, 10000);
@@ -35,16 +35,18 @@ const startServer = async () => {
 
 process.on("SIGTERM", () => shutdown("SIGTERM"));
 process.on("SIGINT", () => shutdown("SIGINT"));
-process.on("unhandledRejection", (reason) => {
+
+process.on("unhandledRejection", (reason: unknown) => {
   console.error("Unhandled promise rejection:", reason);
   shutdown("unhandledRejection");
 });
-process.on("uncaughtException", (error) => {
+
+process.on("uncaughtException", (error: Error) => {
   console.error("Uncaught exception:", error);
   shutdown("uncaughtException");
 });
 
-startServer().catch((error) => {
+startServer().catch((error: unknown) => {
   console.error("Failed to start server:", error);
   process.exit(1);
 });
